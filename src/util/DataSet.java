@@ -13,11 +13,12 @@ import java.util.*;
 
 public class DataSet {
 
+    //读取dateSet.csv
     public ArrayList<List<String>> readCSV(String filename) {
         ArrayList<List<String>> csvList = null;
         try {
             csvList = new ArrayList<>();
-            CsvReader reader = new CsvReader(filename, ',');    //一般用这编码读就可以了
+            CsvReader reader = new CsvReader(filename, ',');
             List<String> cell;
             while (reader.readRecord()) {
                 cell = Arrays.asList(reader.getValues());
@@ -30,6 +31,7 @@ public class DataSet {
         return csvList;
     }
 
+    //写入dataSet到.csv文件
     public void writerCSV(ArrayList<List<String>> dataSet, String outFile) {
         try {
             CsvWriter writer = new CsvWriter(outFile, ',', Charset.forName("utf-8"));
@@ -42,6 +44,7 @@ public class DataSet {
         }
     }
 
+    //通过feature名字，获取其索引
     public int getTheIndexByFeatureName(ArrayList<List<String>> dataSet, String featureName) {
         List<String> featureNameSet = dataSet.get(0);
         for (int i = 0; i < featureNameSet.size(); i++) {
@@ -51,6 +54,7 @@ public class DataSet {
         return -1;
     }
 
+    //通过featureNameSet获取索引集合
     public Set<Integer> getIndexSetByFeatureNames(ArrayList<List<String>> dataSet, String[] featureNameArray) {
         List<String> featureNameSet = dataSet.get(0);
         Set<Integer> indexSet = new HashSet<>();
@@ -71,6 +75,7 @@ public class DataSet {
         }
     }
 
+    //读取json文件
     public JSONObject readJsonFile(String fileName) {
         String lastStr = "";
         try {

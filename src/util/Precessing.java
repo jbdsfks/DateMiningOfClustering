@@ -6,6 +6,8 @@ import org.json.JSONObject;
 import java.util.*;
 
 public class Precessing {
+
+    //通过索引集合删除dataSet中的相应feature
     public ArrayList<List<String>> removeFeatures(ArrayList<List<String>> oldDataSet, Set<Integer> indexs) {
         ArrayList<List<String>> newDataSet = new ArrayList<>();
         for (List<String> oldCell : oldDataSet) {
@@ -25,6 +27,7 @@ public class Precessing {
     }
 
 
+    //将数据集中的diag_1按照groupOfDiagnosis.json规则进行分类
     public ArrayList<List<String>> groupDiagnosis(ArrayList<List<String>> dataSet) {
         DataSet ds = new DataSet();
         int j = ds.getTheIndexByFeatureName(dataSet, "diag_1");

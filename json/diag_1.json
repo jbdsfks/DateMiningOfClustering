@@ -1,0 +1,22 @@
+{
+  "Circulatory":1,
+  "Respiratory":2,
+  "Digestive":3,
+  "Diabetes":4,
+  "Injury":5,
+  "Musculoskeletal":6,
+  "Genitourinary":7,
+  "Neoplasms":8,
+  "Other_1":9,
+  "Other_2":10,
+  "Other_3":11,
+  "Other_4":12,
+  "Other_5":13,
+  "Other_6":14,
+  "Other_7":15,
+  "Other_8":16,
+  "Other_9":17,
+  "Other_10":18,
+  "Other_11":19,
+  "Missing":20
+}

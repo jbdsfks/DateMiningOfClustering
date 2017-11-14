@@ -1,0 +1,8 @@
+{
+  "Caucasian":1,
+  "AfricanAmerican":2,
+  "Asian":3,
+  "Hispanic":4,
+  "Other":5,
+  "?":6
+}

@@ -11,22 +11,21 @@ public class test {
         DataSet ds = new DataSet();
         Precessing dataProcessing = new Precessing();
 
-        ArrayList<List<String>> dataSet = ds.readCSV("diabetic_data.csv");
+        ds.readCSV("diabetic_data.csv");
+        ArrayList<List<Integer>> initTrainSet = new ArrayList<>();
+        for (int i =0 ;i<ds.getOriginalSet().size()-1;i++){
+            List<Integer> cell = new ArrayList<>();
+            for (int j=0;j<ds.getOriginalSet().get(i).size();j++){
+                cell.add(0);
+            }
+            initTrainSet.add(cell);
+        }
+        ds.setTrainSet(initTrainSet);
 
-//        ds.printDataSet(dataSet);
-        String removeFeatureName = "encounter_id,patient_nbr,weight,metformin,repaglinide,nateglinide," +
-                "chlorpropamide,glimepiride,acetohexamide,glipizide,glyburide,tolbutamide,pioglitazone,rosiglitazone," +
-                "acarbose,miglitol,troglitazone,tolazamide,examide,citoglipton,insulin,glyburide-metformin," +
-                "glipizide-metformin,glimepiride-pioglitazone,metformin-rosiglitazone,metformin-pioglitazone";
-        String[] removeFeatureNameArray = removeFeatureName.split(",");
-        Set<Integer> removeFeatureIndexSet = ds.getIndexSetByFeatureNames(dataSet, removeFeatureNameArray);
+        dataProcessing.setDataSet(ds);
+        dataProcessing.dataProcessing();
 
-
-        dataSet = dataProcessing.removeFeatures(dataSet, removeFeatureIndexSet);
-
-        dataSet = dataProcessing.groupDiagnosis(dataSet);
-
-        ds.writerCSV(dataSet, "out.csv");
+        ds.writerCSV(dataProcessing.getDataSet().getTrainSet(), "out.csv");
 
 
     }

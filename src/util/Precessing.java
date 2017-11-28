@@ -24,13 +24,13 @@ public class Precessing {
     }
 
     //通过索引集合删除dataSet中的相应feature
-    public ArrayList<List<String>> removeFeatures(Set<Integer> indexs) {
+    public ArrayList<List<String>> getDataByFeatures(Set<Integer> indexs) {
         ArrayList<List<String>> newDataSet = new ArrayList<>();
         for (List<String> oldCell : dataSet.getOriginalSet()) {
             List<String> newCell = new ArrayList<>();
             int k = 0;
             while (k < oldCell.size()) {
-                if (indexs.contains(k)) {
+                if (!indexs.contains(k)) {
                     k++;
                     continue;
                 }
@@ -44,10 +44,9 @@ public class Precessing {
 
     //将数据集中的diag_1按照groupOfDiagnosis.json规则进行分类
     public ArrayList<List<String>> groupDiagnosis(ArrayList<List<String>> tempDataSet) {
-        DataSet ds = new DataSet();
-        ds.setOriginalSet(tempDataSet);
-        int j = ds.getTheIndexByFeatureName("diag_1");
-        JSONObject groupOfDiagnosis = ds.readJsonFile("json/groupOfDiagnosis.json");
+        int j = dataSet.getTheIndexByFeatureName("diag_1");
+        IOFile ioFile = new IOFile();
+        JSONObject groupOfDiagnosis = ioFile.readJsonFile("json/groupOfDiagnosis.json");
         for (int i = 1; i < tempDataSet.size(); i++) {
             String diag_1 = tempDataSet.get(i).get(j);
             if (diag_1.startsWith("E") || diag_1.startsWith("V")) {
@@ -78,59 +77,86 @@ public class Precessing {
         }
         return tempDataSet;
     }
-
-    public int intFeacture(String featureName, String featureValue) {
-        Class<?> classType = dataSet.getClass();
-        int i = -1;
-        try {
-            Field field = classType.getDeclaredField(featureName);
-            JSONObject raceJsonObject = (JSONObject) field.get(dataSet);
-            i = (int) raceJsonObject.get(featureValue);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return i;
-    }
-
+//
+//    public int intFeacture(String featureName, String featureValue) {
+//        Class<?> classType = dataSet.getClass();
+//        int i = -1;
+//        try {
+//            Field field = classType.getDeclaredField(featureName);
+//            JSONObject raceJsonObject = (JSONObject) field.get(dataSet);
+//            i = (int) raceJsonObject.get(featureValue);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        return i;
+//    }
+//
+//    public double getMinDoubleArray(int j){
+//        double temp[][] = dataSet.getNumericalMatrix();
+//        double min = 0;
+//        for (int i= 0;i<temp.length;i++){
+//            if (min>temp[i][j]){
+//                min = temp[i][j];
+//            }
+//        }
+//        return min;
+//    }
+//
+//    public double getMaxDoubleArray(int j){
+//        double temp[][] = dataSet.getNumericalMatrix();
+//        double max = 0;
+//        for (int i= 0;i<temp.length;i++){
+//            if (max<temp[i][j]){
+//                max = temp[i][j];
+//            }
+//        }
+//        return max;
+//    }
+//
+//    public void normalizedData(){
+//
+//        double temp[][] = dataSet.getNumericalMatrix();
+//
+//        for (int j=0;j<temp[0].length-1;j++){
+//            double max = getMaxDoubleArray(j);
+//            double min = getMinDoubleArray(j);
+//            for (int i=0;i<temp.length;i++){
+//                temp[i][j] = (temp[i][j]-min)*(1.0-0.0)/(max-min)+0.0;
+//            }
+//        }
+//        dataSet.setNumericalMatrix(temp);
+//    }
 
 
     public void dataProcessing() {
         ArrayList<List<String>> tempDataSet;
-        ArrayList<List<Integer>> tempTrainSet;
-
-        String removeFeatureName = "encounter_id,patient_nbr,weight,payer_code,medical_specialty,metformin," +
-                "repaglinide,nateglinide,diag_2,diag_3," +
-                "chlorpropamide,glimepiride,acetohexamide,glipizide,glyburide,tolbutamide,pioglitazone,rosiglitazone," +
-                "acarbose,miglitol,troglitazone,tolazamide,examide,citoglipton,insulin,glyburide-metformin," +
-                "glipizide-metformin,glimepiride-pioglitazone,metformin-rosiglitazone,metformin-pioglitazone";
-        String[] removeFeatureNameArray = removeFeatureName.split(",");
-        Set<Integer> removeFeatureIndexSet = dataSet.getIndexSetByFeatureNames(removeFeatureNameArray);
-        tempDataSet = removeFeatures(removeFeatureIndexSet);
+        String[] FeatureNameArray = {
+                "admission_type_id",
+                "number_emergency",
+                "num_procedures",
+                "number_outpatient",
+                "time_in_hospital",
+                "diag_1",
+                "change",
+                "discharge_disposition_id",
+                "readmitted"
+        };
+        Set<Integer> FeatureIndexSet = dataSet.getIndexSetByFeatureNames(FeatureNameArray);
+        tempDataSet = getDataByFeatures(FeatureIndexSet);
+//        dataSet.setTrainSet(getDataByFeatures(FeatureIndexSet));
         tempDataSet = groupDiagnosis(tempDataSet);
-        tempTrainSet = new ArrayList<>();
-        for (int i =0 ;i<tempDataSet.size()-1;i++){
-            List<Integer> cell = new ArrayList<>();
-            for (int j=0;j<tempDataSet.get(i).size();j++){
-                cell.add(0);
-            }
-            tempTrainSet.add(cell);
-        }
+        double tempTrainSet[][] = new double[tempDataSet.size()-1][tempDataSet.get(0).size()];
         for (int i = 0; i < tempDataSet.get(0).size(); i++) {
             for (int j = 1; j < tempDataSet.size(); j++) {
                 try{
-                    File file = new File("json/" + tempDataSet.get(0).get(i) + ".json");
-                    if (file.exists()) {
-                        tempTrainSet.get(j-1).set(i, intFeacture(tempDataSet.get(0).get(i),tempDataSet.get(j).get(i)));
-                    } else{
-                        tempTrainSet.get(j-1).set(i, Integer.parseInt(tempDataSet.get(j).get(i)));
-                    }
+
                 }catch (Exception e){
                     e.printStackTrace();
-                    System.out.println(tempDataSet.get(0).get(i)+": "+tempDataSet.get(j).get(i));
                 }
             }
         }
-        dataSet.setTrainSet(tempTrainSet);
+        dataSet.setTrainSet(tempDataSet);
+//        dataSet.setNumericalMatrix(tempTrainSet);
     }
 
 }

@@ -1,19 +1,61 @@
 package util;
 
+import bean.DataObjectBean;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 
 public class Precessing {
 
     private DataSet dataSet;
+    private IOFile ioFile;
+    private String[] nominalFeature;
+    private String[] numericFeature;
+    private ArrayList<List<String>> numericData;
+    private ArrayList<List<String>> nominalData;
+    private ArrayList<DataObjectBean> trainSet;
 
+    public IOFile getIoFile() {
+        return ioFile;
+    }
+
+    public void setIoFile(IOFile ioFile) {
+        this.ioFile = ioFile;
+    }
+
+    public ArrayList<List<String>> getNominalData() {
+        return nominalData;
+    }
+
+    public void setNumericData(ArrayList<List<String>> numericData) {
+        this.numericData = numericData;
+    }
+
+    public ArrayList<List<String>> getNumericData() {
+        return numericData;
+    }
+
+    public void setNominalData(ArrayList<List<String>> nominalData) {
+        this.nominalData = nominalData;
+    }
+
+    public String[] getNumericFeature() {
+        return numericFeature;
+    }
+
+    public void setNumericFeature(String[] numericFeature) {
+        this.numericFeature = numericFeature;
+    }
+
+    public String[] getNominalFeature() {
+        return nominalFeature;
+    }
+
+    public void setNominalFeature(String[] nominalFeature) {
+        this.nominalFeature = nominalFeature;
+    }
 
     public DataSet getDataSet() {
         return dataSet;
@@ -21,6 +63,10 @@ public class Precessing {
 
     public void setDataSet(DataSet dataSet) {
         this.dataSet = dataSet;
+    }
+
+    public ArrayList<DataObjectBean> getTrainSet() {
+        return trainSet;
     }
 
     //通过索引集合删除dataSet中的相应feature
@@ -41,10 +87,21 @@ public class Precessing {
         }
         return newDataSet;
     }
-
+    public int intFeacture(String featureName, String featureValue) {
+        Class<?> classType = ioFile.getClass();
+        int i = -1;
+        try {
+            Field field = classType.getDeclaredField(featureName);
+            JSONObject raceJsonObject = (JSONObject) field.get(ioFile);
+            i = (int) raceJsonObject.get(featureValue);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return i;
+    }
     //将数据集中的diag_1按照groupOfDiagnosis.json规则进行分类
     public ArrayList<List<String>> groupDiagnosis(ArrayList<List<String>> tempDataSet) {
-        int j = dataSet.getTheIndexByFeatureName("diag_1");
+        int j = dataSet.getTheIndexByFeatureName("diag_1", tempDataSet);
         IOFile ioFile = new IOFile();
         JSONObject groupOfDiagnosis = ioFile.readJsonFile("json/groupOfDiagnosis.json");
         for (int i = 1; i < tempDataSet.size(); i++) {
@@ -77,86 +134,98 @@ public class Precessing {
         }
         return tempDataSet;
     }
-//
-//    public int intFeacture(String featureName, String featureValue) {
-//        Class<?> classType = dataSet.getClass();
-//        int i = -1;
-//        try {
-//            Field field = classType.getDeclaredField(featureName);
-//            JSONObject raceJsonObject = (JSONObject) field.get(dataSet);
-//            i = (int) raceJsonObject.get(featureValue);
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
-//        return i;
-//    }
-//
-//    public double getMinDoubleArray(int j){
-//        double temp[][] = dataSet.getNumericalMatrix();
-//        double min = 0;
-//        for (int i= 0;i<temp.length;i++){
-//            if (min>temp[i][j]){
-//                min = temp[i][j];
-//            }
-//        }
-//        return min;
-//    }
-//
-//    public double getMaxDoubleArray(int j){
-//        double temp[][] = dataSet.getNumericalMatrix();
-//        double max = 0;
-//        for (int i= 0;i<temp.length;i++){
-//            if (max<temp[i][j]){
-//                max = temp[i][j];
-//            }
-//        }
-//        return max;
-//    }
-//
-//    public void normalizedData(){
-//
-//        double temp[][] = dataSet.getNumericalMatrix();
-//
-//        for (int j=0;j<temp[0].length-1;j++){
-//            double max = getMaxDoubleArray(j);
-//            double min = getMinDoubleArray(j);
-//            for (int i=0;i<temp.length;i++){
-//                temp[i][j] = (temp[i][j]-min)*(1.0-0.0)/(max-min)+0.0;
-//            }
-//        }
-//        dataSet.setNumericalMatrix(temp);
-//    }
 
+    public void changeToTrainSet(){
+        int n = getNominalData().size();
 
-    public void dataProcessing() {
-        ArrayList<List<String>> tempDataSet;
-        String[] FeatureNameArray = {
-                "admission_type_id",
-                "number_emergency",
-                "num_procedures",
-                "number_outpatient",
-                "time_in_hospital",
-                "diag_1",
-                "change",
-                "discharge_disposition_id",
-                "readmitted"
-        };
-        Set<Integer> FeatureIndexSet = dataSet.getIndexSetByFeatureNames(FeatureNameArray);
-        tempDataSet = getDataByFeatures(FeatureIndexSet);
-//        dataSet.setTrainSet(getDataByFeatures(FeatureIndexSet));
-        tempDataSet = groupDiagnosis(tempDataSet);
-        double tempTrainSet[][] = new double[tempDataSet.size()-1][tempDataSet.get(0).size()];
-        for (int i = 0; i < tempDataSet.get(0).size(); i++) {
-            for (int j = 1; j < tempDataSet.size(); j++) {
-                try{
-
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
+        for (int i = 1; i < n; i++) {
+            DataObjectBean dataObjectBean = new DataObjectBean();
+            int nominalSize = nominalFeature.length;
+            int numericSize = numericFeature.length;
+            int[] nominalData = new int[nominalSize];
+            float[] numericData = new float[numericSize];
+            for (int j = 0; j < getNumericData().get(i).size(); j++) {
+                numericData[j] = Float.parseFloat(getNumericData().get(i).get(j));
+            }
+            for (int j = 0; j < getNominalData().get(i).size(); j++) {
+                nominalData[j] = Integer.parseInt(getNominalData().get(i).get(j));
+            }
+            dataObjectBean.setNominalData(nominalData);
+            dataObjectBean.setNumericData(numericData);
+            trainSet.add(dataObjectBean);
+        }
+    }
+    public float getNumericMin(int j) {
+        float min = 0;
+        for (int i = 0; i < trainSet.size(); i++) {
+            if (min > trainSet.get(i).getNumericData()[j]) {
+                min = trainSet.get(i).getNumericData()[j];
             }
         }
-        dataSet.setTrainSet(tempDataSet);
-//        dataSet.setNumericalMatrix(tempTrainSet);
+        return min;
+    }
+
+    public float getNumericMax(int j) {
+        float max = 0;
+        for (int i = 0; i < trainSet.size(); i++) {
+            if (max < trainSet.get(i).getNumericData()[j]) {
+                max = trainSet.get(i).getNumericData()[j];
+            }
+        }
+        return max;
+    }
+
+    public void normalizedData() {
+
+        int numericSize = numericFeature.length;
+        float[] max = new float[numericSize];
+        float[] min = new float[numericSize];
+        for (int j = 0; j <numericFeature.length; j++) {
+            max[j] = getNumericMax(j);
+            min[j] = getNumericMin(j);
+        }
+        for (int i=0;i<trainSet.size();i++){
+            for (int j=0;j<trainSet.get(i).getNumericData().length;j++){
+                float oldValue = trainSet.get(i).getNumericData()[j];
+                float newValue = (oldValue-min[j])*(1.0f-0.0f)/(max[j]-min[j])+0.0f;
+                trainSet.get(i).getNumericData()[j] = newValue;
+            }
+        }
+    }
+    public void dataProcessing() {
+
+        Set<Integer> FeatureIndexSet = dataSet.getIndexSetByFeatureNames(numericFeature);
+        numericData = getDataByFeatures(FeatureIndexSet);
+
+
+
+        FeatureIndexSet = dataSet.getIndexSetByFeatureNames(nominalFeature);
+        nominalData = getDataByFeatures(FeatureIndexSet);
+        nominalData = groupDiagnosis(nominalData);
+
+        String[] nominal = {
+          "age",
+          "change",
+          "diabetesMed",
+          "A1Cresult",
+          "diag_1",
+          "gender",
+          "max_glu_serum",
+          "race",
+          "readmitted"
+        };
+
+        for (String str:nominal){
+            for (int i=1;i<nominalData.size();i++){
+                int index = dataSet.getTheIndexByFeatureName(str,nominalData);
+                String stringValue = nominalData.get(i).get(index);
+                int intValue= intFeacture(str,stringValue);
+                nominalData.get(i).set(index,String.valueOf(intValue));
+            }
+        }
+        trainSet = new ArrayList<>();
+        changeToTrainSet();
+        normalizedData();
     }
 
 }

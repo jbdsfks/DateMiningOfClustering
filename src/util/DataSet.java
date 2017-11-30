@@ -1,5 +1,7 @@
 package util;
 
+import bean.DataObjectBean;
+
 import java.util.*;
 
 public class DataSet {
@@ -7,22 +9,16 @@ public class DataSet {
     //读取dateSet.csv
     private ArrayList<List<String>> originalSet;
     private List<String> featuresName;
-    private ArrayList<DataObject> trainSet;
+    private ArrayList<DataObjectBean> trainSet;
 
     public DataSet() {
     }
 
-    public DataSet(String fileName) {
-        IOFile ioFile = new IOFile();
-        this.setOriginalSet(ioFile.readCSV(fileName));
-        this.setFeaturesName(this.getOriginalSet().get(0));
-    }
-
-    public void setTrainSet(ArrayList<DataObject> trainSet) {
+    public void setTrainSet(ArrayList<DataObjectBean> trainSet) {
         this.trainSet = trainSet;
     }
 
-    public ArrayList<DataObject> getTrainSet() {
+    public ArrayList<DataObjectBean> getTrainSet() {
         return trainSet;
     }
 
@@ -54,8 +50,8 @@ public class DataSet {
     }
 
     //通过feature名字，获取其索引
-    public int getTheIndexByFeatureName(String featureName) {
-        List<String> featureNameSet = this.getOriginalSet().get(0);
+    public int getTheIndexByFeatureName(String featureName, ArrayList<List<String>> dataSet) {
+        List<String> featureNameSet = dataSet.get(0);
         for (int i = 0; i < featureNameSet.size(); i++) {
             if (featureName.equals(featureNameSet.get(i)))
                 return i;

@@ -1,98 +1,80 @@
-import util.Kmeans;
-import util.Clustering;
-import util.DataSet;
-import util.Precessing;
+import bean.DataObjectBean;
+import util.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.Arrays;
+
 
 public class test {
 
 
     public static void main(String[] args) {
-        //初始化一个Kmean对象，将k置为10
-        Kmeans k=new Kmeans(10);
-        ArrayList<float[]> dataSet=new ArrayList<float[]>();
+        String filename = "diabetic_data.csv";
+        IOFile ioFile = new IOFile();
+        DataSet ds = new DataSet();
+        ds.setOriginalSet(ioFile.readCSV(filename));
+        ds.setFeaturesName(ds.getOriginalSet().get(0));
+        String[] numericFeature = {
+                "time_in_hospital",
+                "num_lab_procedures",
+                "num_procedures",
+                "num_medications",
+                "number_outpatient",
+                "number_emergency",
+                "number_inpatient",
+                "number_diagnoses"
+        };
+        String[] nominalFeature = {
+                "race",
+                "gender",
+                "age",
+                "admission_type_id",
+                "discharge_disposition_id",
+                "admission_source_id",
+                "diag_1",
+                "max_glu_serum",
+                "A1Cresult",
+                "change",
+                "diabetesMed",
+                "readmitted"
+        };
+        Precessing precessing = new Precessing();
+        precessing.setNominalFeature(nominalFeature);
+        precessing.setNumericFeature(numericFeature);
+        precessing.setDataSet(ds);
+        precessing.setIoFile(ioFile);
+        precessing.dataProcessing();
 
-        dataSet.add(new float[]{1,2});
-        dataSet.add(new float[]{3,3});
-        dataSet.add(new float[]{3,4});
-        dataSet.add(new float[]{5,6});
-        dataSet.add(new float[]{8,9});
-        dataSet.add(new float[]{4,5});
-        dataSet.add(new float[]{6,4});
-        dataSet.add(new float[]{3,9});
-        dataSet.add(new float[]{5,9});
-        dataSet.add(new float[]{4,2});
-        dataSet.add(new float[]{1,9});
-        dataSet.add(new float[]{7,8});
-        //设置原始数据集
-        k.setDataSet(dataSet);
-        //执行算法
-        k.execute();
-        //得到聚类结果
-        ArrayList<ArrayList<float[]>> cluster=k.getCluster();
-        //查看结果
-        for(int i=0;i<cluster.size();i++)
-        {
-            k.printDataArray(cluster.get(i), "cluster["+i+"]");
+        int k = 2;
+        float a = 0.5f;
+
+        Kprototypes kprototypes = new Kprototypes(k, a, nominalFeature, numericFeature, precessing.getTrainSet());
+        kprototypes.execute();
+
+        int i=0;
+        for (ArrayList<DataObjectBean> cluster:kprototypes.getCluster()) {
+            ArrayList<ArrayList<String>> clu = new ArrayList<>();
+            i++;
+            String outfile = "out_"+i+".csv";
+            ArrayList<String> featureName = new ArrayList<>();
+            featureName.addAll(Arrays.asList(kprototypes.getNumericFeature()));
+            featureName.addAll(Arrays.asList(kprototypes.getNominalFeature()));
+            clu.add(featureName);
+            for (DataObjectBean dataObjectBean:cluster){
+                ArrayList<String> data = new ArrayList<>();
+                String[] numericSet = new String[kprototypes.getNumericFeature().length];
+                for (int j=0;j<kprototypes.getNumericFeature().length;j++){
+                    numericSet[j] = String.valueOf(dataObjectBean.getNumericData()[j]);
+                }
+                data.addAll(Arrays.asList(numericSet));
+                String[] nominalSet = new String[kprototypes.getNominalFeature().length];
+                for (int j=0;j<kprototypes.getNominalFeature().length;j++){
+                    nominalSet[j] = String.valueOf(dataObjectBean.getNominalData()[j]);
+                }
+                data.addAll(Arrays.asList(nominalSet));
+                clu.add(data);
+            }
+            ioFile.writerStringCSV(clu,outfile);
         }
-//        DataSet ds = new DataSet();
-////        Precessing dataProcessing = new Precessing();
-////
-////        ds.readCSV("diabetic_data.csv");
-////
-////        dataProcessing.setDataSet(ds);
-////        dataProcessing.dataProcessing();
-////
-////        ds.writerStringCSV(dataProcessing.getDataSet().getTrainSet(), "out1.csv");
-////        ArrayList<List<String>> outData1 = new ArrayList<>();
-////        outData1.add(dataProcessing.getDataSet().getTrainSet().get(0));
-////        for (int m=1;m<dataProcessing.getDataSet().getNumericalMatrix().length;m++){
-////            List<String> cell = new ArrayList<>();
-////            for (int n=0;n<dataProcessing.getDataSet().getNumericalMatrix()[0].length;n++){
-////                cell.add(Double.toString(dataProcessing.getDataSet().getNumericalMatrix()[m][n]));
-////            }
-////            outData1.add(cell);
-////        }
-////        ds.writerStringCSV(outData1,"out2.csv");
-//
-//
-//
-//
-//
-//        double data[][]={
-//                {1,1,1},
-//                {-12,-10,-30},
-//                {1,2,4},
-//                {2,2,5},
-//                {-4,-3,-9},
-//                {5,3,1},
-//                {4,4,1},
-//                {5,4,1},
-//                {-10,10,10}
-//        };
-//
-//
-//        int k=2;
-//        Clustering clustering = new Clustering();
-////        ArrayList<Cluster> clusterResult =  clustering.KNN(k,dataProcessing.getDataSet().getNumericalMatrix());
-//
-//
-//        ArrayList<Cluster> clusterResult = clustering.KNN(k,data);
-////        for (int i=0;i<k;i++){
-////            ArrayList<List<String>> outData = new ArrayList<>();
-////            outData.add(dataProcessing.getDataSet().getTrainSet().get(0));
-////            for (int m=1;m<clusterResult.get(i).getClusterData().size()+1;m++){
-////                List<String> cell = new ArrayList<>();
-////                for (int n=0;n<clusterResult.get(i).getClusterData().get(m-1).size();n++){
-////                    cell.add(clusterResult.get(i).getClusterData().get(m-1).get(n).toString());
-////                }
-////                outData.add(cell);
-////            }
-////            ds.writerStringCSV(outData,"cluster_"+i+".csv");
-////        }
     }
 }

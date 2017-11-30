@@ -13,6 +13,17 @@ import java.util.Arrays;
 import java.util.List;
 
 public class IOFile {
+
+    public JSONObject A1Cresult = readJsonFile("json/A1Cresult.json");
+    public JSONObject age = readJsonFile("json/age.json");
+    public JSONObject change = readJsonFile("json/change.json");
+    public JSONObject diabetesMed = readJsonFile("json/diabetesMed.json");
+    public JSONObject diag_1 = readJsonFile("json/diag_1.json");
+    public JSONObject gender = readJsonFile("json/gender.json");
+    public JSONObject max_glu_serum = readJsonFile("json/max_glu_serum.json");
+    public JSONObject race = readJsonFile("json/race.json");
+    public JSONObject readmitted = readJsonFile("json/readmitted.json");
+
     public ArrayList<List<String>> readCSV(String filename) {
         ArrayList<List<String>> dataSet = new ArrayList<>();
         try {
@@ -30,10 +41,10 @@ public class IOFile {
     }
 
     //写入dataSet到.csv文件
-    public void writerStringCSV(ArrayList<List<String>> dataSet, String outFile) {
+    public void writerStringCSV(ArrayList<ArrayList<String>> dataSet, String outFile) {
         try {
             CsvWriter writer = new CsvWriter(outFile, ',', Charset.forName("utf-8"));
-            for (List<String> cell : dataSet) {
+            for (ArrayList<String> cell : dataSet) {
                 writer.writeRecord(cell.toArray(new String[cell.size()]));
             }
             writer.close();

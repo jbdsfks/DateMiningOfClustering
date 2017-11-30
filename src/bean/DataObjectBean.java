@@ -1,10 +1,9 @@
-package util;
+package bean;
 
-import java.util.ArrayList;
-
-public class DataObject {
+public class DataObjectBean {
     private int[] nominalData;
     private float[] numericData;
+
 
     public float[] getNumericData() {
         return numericData;

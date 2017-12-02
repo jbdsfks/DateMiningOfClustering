@@ -16,6 +16,15 @@ public class Precessing {
     private ArrayList<List<String>> numericData;
     private ArrayList<List<String>> nominalData;
     private ArrayList<DataObjectBean> trainSet;
+    private float a;
+
+    public void setA(float a) {
+        this.a = a;
+    }
+
+    public float getA() {
+        return a;
+    }
 
     public IOFile getIoFile() {
         return ioFile;
@@ -164,7 +173,13 @@ public class Precessing {
         }
         return min;
     }
-
+    public float getNumericAve(int j) {
+        float total = 0;
+        for (int i = 0; i < trainSet.size(); i++) {
+            total+=trainSet.get(i).getNumericData()[j];
+        }
+        return total/trainSet.size();
+    }
     public float getNumericMax(int j) {
         float max = 0;
         for (int i = 0; i < trainSet.size(); i++) {
@@ -174,7 +189,6 @@ public class Precessing {
         }
         return max;
     }
-
     public void normalizedData() {
 
         int numericSize = numericFeature.length;
@@ -191,6 +205,27 @@ public class Precessing {
                 trainSet.get(i).getNumericData()[j] = newValue;
             }
         }
+    }
+    public double getStandardDeviation(){
+        double stand = 0;
+        double[] standard = new double[numericFeature.length];
+        double[] avgs = new double[numericFeature.length];
+        double total;
+
+        for (int j = 0; j <numericFeature.length; j++) {
+            total=0;
+            avgs[j] = getNumericAve(j);
+            for (int i=0;i<trainSet.size();i++){
+                total = total+(trainSet.get(i).getNumericData()[j]-avgs[j])*(trainSet.get(i).getNumericData()[j]-avgs[j]);
+            }
+            standard[j]=Math.sqrt(total/trainSet.size());
+        }
+
+        for (double flo:standard){
+            stand+=flo;
+        }
+        return stand/standard.length;
+
     }
     public void dataProcessing() {
 
@@ -226,6 +261,7 @@ public class Precessing {
         trainSet = new ArrayList<>();
         changeToTrainSet();
         normalizedData();
+        setA((float) getStandardDeviation());
     }
 
 }

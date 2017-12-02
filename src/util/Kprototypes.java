@@ -17,12 +17,21 @@ public class Kprototypes {
     private String[] numericFeature;
     private ArrayList<DataObjectBean> trainSet;
     private ArrayList<DataObjectBean> center;// 中心链表
+    int[] randoms;
     private ArrayList<ArrayList<DataObjectBean>> cluster; // 簇
-    private ArrayList<Float> jc;// 误差平方和，k越接近numericSetLength，误差越小
+    private ArrayList<Double> jc;// 误差平方和，k越接近numericSetLength，误差越小
     private Random random;
+
+    public int[] getRandoms() {
+        return randoms;
+    }
 
     public ArrayList<ArrayList<DataObjectBean>> getCluster() {
         return cluster;
+    }
+
+    public ArrayList<DataObjectBean> getCenter() {
+        return center;
     }
 
     public String[] getNominalFeature() {
@@ -45,7 +54,7 @@ public class Kprototypes {
         this.trainSet = trainSet;
     }
 
-    public Kprototypes(int k, float a,String[] nominalFeature,String[] numericFeature,ArrayList<DataObjectBean> trainSet) {
+    public Kprototypes(int k, float a, String[] nominalFeature, String[] numericFeature, ArrayList<DataObjectBean> trainSet,int[] randoms) {
         if (k <= 0) {
             k = 1;
         }
@@ -54,9 +63,14 @@ public class Kprototypes {
         }
         this.k = k;
         this.a = a;
-        this.nominalFeature=nominalFeature;
-        this.numericFeature=numericFeature;
-        this.trainSet=trainSet;
+        this.randoms=randoms;
+        this.nominalFeature = nominalFeature;
+        this.numericFeature = numericFeature;
+        this.trainSet = trainSet;
+    }
+
+    public int getK() {
+        return k;
     }
 
     /**
@@ -71,7 +85,7 @@ public class Kprototypes {
         }
         center = initCenters();
         cluster = initCluster();
-        jc = new ArrayList<Float>();
+        jc = new ArrayList<Double>();
     }
 
     /**
@@ -81,27 +95,31 @@ public class Kprototypes {
      */
     private ArrayList<DataObjectBean> initCenters() {
         ArrayList<DataObjectBean> center = new ArrayList<>();
-        int[] randoms = new int[k];
-        boolean flag;
-        int temp = random.nextInt(trainSetLength);
-        randoms[0] = temp;
-        for (int i = 1; i < k; i++) {
-            flag = true;
-            while (flag) {
-                temp = random.nextInt(trainSetLength);
-                int j = 0;
-                while (j < i) {
-                    if (temp == randoms[j]) {
-                        break;
-                    }
-                    j++;
-                }
-                if (j == i) {
-                    flag = false;
-                }
-            }
-            randoms[i] = temp;
-        }
+//        randoms = new int[k];
+//        boolean flag;
+//        int temp = random.nextInt(trainSetLength);
+//        randoms[0] = temp;
+//        System.out.println("初始簇_1_的中心点索引："+randoms[0]);
+//        System.out.println("初始簇_2_的中心点索引："+randoms[1]);
+//        System.out.println("初始簇_3_的中心点索引："+randoms[2]);
+//        for (int i = 2; i < k; i++) {
+//            flag = true;
+//            while (flag) {
+//                temp = random.nextInt(trainSetLength);
+//                int j = 0;
+//                while (j < i) {
+//                    if (temp == randoms[j]) {
+//                        break;
+//                    }
+//                    j++;
+//                }
+//                if (j == i) {
+//                    flag = false;
+//                }
+//            }
+//            randoms[i] = temp;
+//            System.out.println("初始簇_"+(i+1)+"_的中心点索引："+randoms[i]);
+//        }
         for (int i = 0; i < k; i++) {
             center.add(trainSet.get(randoms[i]));// 生成初始化中心链表
         }
@@ -131,7 +149,7 @@ public class Kprototypes {
     private float distance(float[] element, float[] center) {
         float distance = 0.0f;
         for (int i = 0; i < element.length; i++) {
-            distance = distance + element[i] * element[i] + center[i] * center[i];
+            distance = distance + (element[i] - center[i]) * (element[i] - center[i]);
         }
         distance = (float) Math.sqrt(distance);
         return distance;
@@ -139,15 +157,16 @@ public class Kprototypes {
 
     /**
      * 计算两个点之间的相异度
+     * 相等部分为0，不等部分为1
      *
      * @param element 点1
      * @param center  点2
-     * @return 距离
+     * @return 相异度
      */
     private float difference(int[] element, int[] center) {
         float distance = 0.0f;
         for (int i = 0; i < element.length; i++) {
-            if (element[i] == center[i])
+            if (element[i] != center[i])
                 distance = distance + 1;
         }
         return distance;
@@ -211,7 +230,7 @@ public class Kprototypes {
     private float errorSquare(float[] element, float[] center) {
         float distance = 0.0f;
         for (int i = 0; i < element.length; i++) {
-            distance = distance + element[i] * element[i] + center[i] * center[i];
+            distance = distance + (element[i] - center[i]) * (element[i] - center[i]);
         }
         return distance;
     }
@@ -219,9 +238,10 @@ public class Kprototypes {
 
     /**
      * 计算误差平方和准则函数方法
+     * 数值属性欧式距离的平方+a*标称属性相异度
      */
     private void countRule() {
-        float jcF = 0.0f;
+        double jcF = 0.0f;
         float numericF;
         float nominalF;
         for (int i = 0; i < cluster.size(); i++) {
@@ -240,12 +260,12 @@ public class Kprototypes {
      * @param ints 数组
      * @return temp :temp[0] = indexOfMax;tmep[1]=Max
      */
-    private int[] maxofIntArray(int[] ints){
+    private int[] maxofIntArray(int[] ints) {
         int[] temp = new int[2];
         temp[0] = -1;
         temp[1] = -1;
-        for (int i=0;i<ints.length;i++){
-            if(ints[i]>temp[1]){
+        for (int i = 0; i < ints.length; i++) {
+            if (ints[i] > temp[1]) {
                 temp[1] = ints[i];
                 temp[0] = i;
             }
@@ -253,30 +273,44 @@ public class Kprototypes {
         return temp;
     }
 
-    private int getModesOfIntArray(int[] ints){
+    /**
+     *
+     * int[]数组的众数
+     *
+     * @param ints 数组
+     * @return 众数
+     */
+    private int getModesOfIntArray(int[] ints) {
         int[] maxAndIndex = maxofIntArray(ints);
-        int[] temps = new int[maxAndIndex[1]+1];
-        for (int i=0;i<temps.length;i++){
+        int[] temps = new int[maxAndIndex[1] + 1];
+        for (int i = 0; i < temps.length; i++) {
             temps[i] = 0;
         }
-        for (int i:ints){
+        for (int i : ints) {
             temps[i] += 1;
         }
         int[] modes = maxofIntArray(temps);
         return modes[0];
     }
 
-    private int[] modesOfData(ArrayList<DataObjectBean> theCluster){
+    /**
+     *
+     * 返回一个簇中的所有标称的众数
+     *
+     * @param theCluster 聚类簇
+     * @return 簇内标称属性的众数集合
+     */
+    private int[] modesOfData(ArrayList<DataObjectBean> theCluster) {
         ArrayList<int[]> data = new ArrayList<>();
-        for (int j=0;j<theCluster.get(0).getNominalData().length;j++){
+        for (int j = 0; j < theCluster.get(0).getNominalData().length; j++) {
             int[] row = new int[theCluster.size()];
-            for (int i=0;i<theCluster.size();i++){
+            for (int i = 0; i < theCluster.size(); i++) {
                 row[i] = theCluster.get(i).getNominalData()[j];
             }
             data.add(row);
         }
         int[] modes = new int[data.size()];
-        for (int i=0;i<modes.length;i++){
+        for (int i = 0; i < modes.length; i++) {
             modes[i] = getModesOfIntArray(data.get(i));
         }
         return modes;
@@ -320,21 +354,6 @@ public class Kprototypes {
     }
 
     /**
-     * 打印数据，测试用
-     *
-     * @param dataArray     数据集
-     * @param dataArrayName 数据集名称
-     */
-    public void printDataArray(ArrayList<float[]> dataArray,
-                               String dataArrayName) {
-        for (int i = 0; i < dataArray.size(); i++) {
-            System.out.println("print:" + dataArrayName + "[" + i + "]={"
-                    + dataArray.get(i)[0] + "," + dataArray.get(i)[1] + "}");
-        }
-        System.out.println("===================================");
-    }
-
-    /**
      * K-prototypes核心算法过程
      */
     private void KPrototypes() {
@@ -346,6 +365,7 @@ public class Kprototypes {
 
             // 误差不变了，分组完成
             if (m != 0) {
+//                System.out.println((m) + "次:" + jc.get(m));
                 if (Math.abs(jc.get(m) - jc.get(m - 1)) <= 0.0001f) {
                     break;
                 }
@@ -357,6 +377,7 @@ public class Kprototypes {
             cluster.clear();
             cluster = initCluster();
         }
+//        System.out.println("迭代次数："+m);
 
     }
 
@@ -364,12 +385,30 @@ public class Kprototypes {
      * 执行算法
      */
     public void execute() {
-        long startTime = System.currentTimeMillis();
-        System.out.println("K-prototypes begins");
+//        long startTime = System.currentTimeMillis();
+//
+//        System.out.println("K-prototypes begins");
         KPrototypes();
-        long endTime = System.currentTimeMillis();
-        System.out.println("K-prototypes running time=" + (endTime - startTime)
-                + "ms");
-        System.out.println("K-prototypes ends");
+//        long endTime = System.currentTimeMillis();
+//        System.out.println("K-prototypes running time=" + (endTime - startTime)/1000.0f
+//                + "s");
+//        System.out.println("K-prototypes ends");
+//        for (int i=0;i<k;i++){
+//            System.out.println("cluster_"+(i+1)+"_center:");
+//            for (String str:numericFeature) {
+//                System.out.print(str+",");
+//            }
+//            for (String str:nominalFeature) {
+//                System.out.print(str+",");
+//            }
+//            System.out.println();
+//            for (float value:center.get(i).getNumericData()){
+//                System.out.print(value+",");
+//            }
+//            for (int value:center.get(i).getNominalData()){
+//                System.out.print(value+",");
+//            }
+//            System.out.println();
+//        }
     }
 }

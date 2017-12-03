@@ -73,6 +73,29 @@ public class Kprototypes {
         return k;
     }
 
+    private void initRandoms(){
+        randoms = new int[k];
+        boolean flag;
+        int temp = random.nextInt(trainSetLength);
+        randoms[0] = temp;
+        for (int i = 1; i < k; i++) {
+            flag = true;
+            while (flag) {
+                temp = random.nextInt(trainSetLength);
+                int j = 0;
+                while (j < i) {
+                    if (temp == randoms[j]) {
+                        break;
+                    }
+                    j++;
+                }
+                if (j == i) {
+                    flag = false;
+                }
+            }
+            randoms[i] = temp;
+        }
+    }
     /**
      * 初始化
      */
@@ -83,6 +106,8 @@ public class Kprototypes {
         if (k > trainSetLength) {
             k = trainSetLength;
         }
+        if (randoms[0] == -1)
+            initRandoms();
         center = initCenters();
         cluster = initCluster();
         jc = new ArrayList<Double>();
@@ -95,31 +120,7 @@ public class Kprototypes {
      */
     private ArrayList<DataObjectBean> initCenters() {
         ArrayList<DataObjectBean> center = new ArrayList<>();
-//        randoms = new int[k];
-//        boolean flag;
-//        int temp = random.nextInt(trainSetLength);
-//        randoms[0] = temp;
-//        System.out.println("初始簇_1_的中心点索引："+randoms[0]);
-//        System.out.println("初始簇_2_的中心点索引："+randoms[1]);
-//        System.out.println("初始簇_3_的中心点索引："+randoms[2]);
-//        for (int i = 2; i < k; i++) {
-//            flag = true;
-//            while (flag) {
-//                temp = random.nextInt(trainSetLength);
-//                int j = 0;
-//                while (j < i) {
-//                    if (temp == randoms[j]) {
-//                        break;
-//                    }
-//                    j++;
-//                }
-//                if (j == i) {
-//                    flag = false;
-//                }
-//            }
-//            randoms[i] = temp;
-//            System.out.println("初始簇_"+(i+1)+"_的中心点索引："+randoms[i]);
-//        }
+
         for (int i = 0; i < k; i++) {
             center.add(trainSet.get(randoms[i]));// 生成初始化中心链表
         }
@@ -385,30 +386,30 @@ public class Kprototypes {
      * 执行算法
      */
     public void execute() {
-//        long startTime = System.currentTimeMillis();
-//
-//        System.out.println("K-prototypes begins");
+        long startTime = System.currentTimeMillis();
+
+        System.out.println("K-prototypes begins");
         KPrototypes();
-//        long endTime = System.currentTimeMillis();
-//        System.out.println("K-prototypes running time=" + (endTime - startTime)/1000.0f
-//                + "s");
-//        System.out.println("K-prototypes ends");
-//        for (int i=0;i<k;i++){
-//            System.out.println("cluster_"+(i+1)+"_center:");
-//            for (String str:numericFeature) {
-//                System.out.print(str+",");
-//            }
-//            for (String str:nominalFeature) {
-//                System.out.print(str+",");
-//            }
-//            System.out.println();
-//            for (float value:center.get(i).getNumericData()){
-//                System.out.print(value+",");
-//            }
-//            for (int value:center.get(i).getNominalData()){
-//                System.out.print(value+",");
-//            }
-//            System.out.println();
-//        }
+        long endTime = System.currentTimeMillis();
+        System.out.println("K-prototypes running time=" + (endTime - startTime)/1000.0f
+                + "s");
+        System.out.println("K-prototypes ends");
+        for (int i=0;i<k;i++){
+            System.out.println("cluster_"+(i+1)+"_center:");
+            for (String str:numericFeature) {
+                System.out.print(str+",");
+            }
+            for (String str:nominalFeature) {
+                System.out.print(str+",");
+            }
+            System.out.println();
+            for (float value:center.get(i).getNumericData()){
+                System.out.print(value+",");
+            }
+            for (int value:center.get(i).getNominalData()){
+                System.out.print(value+",");
+            }
+            System.out.println();
+        }
     }
 }

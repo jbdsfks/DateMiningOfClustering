@@ -17,10 +17,9 @@ public class Kprototypes {
     private String[] numericFeature;
     private ArrayList<DataObjectBean> trainSet;
     private ArrayList<DataObjectBean> center;// 中心链表
-    int[] randoms;
+    private  int[] randoms;
     private ArrayList<ArrayList<DataObjectBean>> cluster; // 簇
     private ArrayList<Double> jc;// 误差平方和，k越接近numericSetLength，误差越小
-    private Random random;
 
     public int[] getRandoms() {
         return randoms;
@@ -73,41 +72,15 @@ public class Kprototypes {
         return k;
     }
 
-    private void initRandoms(){
-        randoms = new int[k];
-        boolean flag;
-        int temp = random.nextInt(trainSetLength);
-        randoms[0] = temp;
-        for (int i = 1; i < k; i++) {
-            flag = true;
-            while (flag) {
-                temp = random.nextInt(trainSetLength);
-                int j = 0;
-                while (j < i) {
-                    if (temp == randoms[j]) {
-                        break;
-                    }
-                    j++;
-                }
-                if (j == i) {
-                    flag = false;
-                }
-            }
-            randoms[i] = temp;
-        }
-    }
     /**
      * 初始化
      */
     private void init() {
         m = 0;
-        random = new Random();
         trainSetLength = trainSet.size();
         if (k > trainSetLength) {
             k = trainSetLength;
         }
-        if (randoms[0] == -1)
-            initRandoms();
         center = initCenters();
         cluster = initCluster();
         jc = new ArrayList<Double>();
@@ -186,11 +159,6 @@ public class Kprototypes {
             if (distance[i] < minDistance) {
                 minDistance = distance[i];
                 minLocation = i;
-            } else if (distance[i] == minDistance) // 如果相等，随机返回一个位置
-            {
-                if (random.nextInt(10) < 5) {
-                    minLocation = i;
-                }
             }
         }
 
@@ -394,22 +362,22 @@ public class Kprototypes {
         System.out.println("K-prototypes running time=" + (endTime - startTime)/1000.0f
                 + "s");
         System.out.println("K-prototypes ends");
-        for (int i=0;i<k;i++){
-            System.out.println("cluster_"+(i+1)+"_center:");
-            for (String str:numericFeature) {
-                System.out.print(str+",");
-            }
-            for (String str:nominalFeature) {
-                System.out.print(str+",");
-            }
-            System.out.println();
-            for (float value:center.get(i).getNumericData()){
-                System.out.print(value+",");
-            }
-            for (int value:center.get(i).getNominalData()){
-                System.out.print(value+",");
-            }
-            System.out.println();
-        }
+//        for (int i=0;i<k;i++){
+//            System.out.println("cluster_"+(i+1)+"_center:");
+//            for (String str:numericFeature) {
+//                System.out.print(str+",");
+//            }
+//            for (String str:nominalFeature) {
+//                System.out.print(str+",");
+//            }
+//            System.out.println();
+//            for (float value:center.get(i).getNumericData()){
+//                System.out.print(value+",");
+//            }
+//            for (int value:center.get(i).getNominalData()){
+//                System.out.print(value+",");
+//            }
+//            System.out.println();
+//        }
     }
 }

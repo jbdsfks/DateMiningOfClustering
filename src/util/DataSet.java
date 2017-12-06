@@ -1,7 +1,5 @@
 package util;
 
-import bean.DataObjectBean;
-
 import java.util.*;
 
 public class DataSet {
@@ -9,17 +7,8 @@ public class DataSet {
     //读取dateSet.csv
     private ArrayList<List<String>> originalSet;
     private List<String> featuresName;
-    private ArrayList<DataObjectBean> trainSet;
 
     public DataSet() {
-    }
-
-    public void setTrainSet(ArrayList<DataObjectBean> trainSet) {
-        this.trainSet = trainSet;
-    }
-
-    public ArrayList<DataObjectBean> getTrainSet() {
-        return trainSet;
     }
 
     public ArrayList<List<String>> getOriginalSet() {
